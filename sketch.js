@@ -1,4 +1,4 @@
-// Game variables 
+// Game variables
 let playerX, playerY;
 let coinX, coinY;
 let obstacleX, obstacleY;
@@ -6,7 +6,6 @@ let score = 0;
 let hits = 0;
 let obstacleSpeed = 2;
 let gameOver = false;
-let checkCoinCollected = false;
 
 function setup() {
   createCanvas(400, 400);
@@ -15,15 +14,20 @@ function setup() {
 
 function initializeGame() {
   // Initialize player position (bottom center)
-  playerX = width/2;
+  playerX = width / 2;
   playerY = height - 20;
   
   // Initialize coin position
   newCoin();
   
-  // Initialize obstacle position
-  obstacleX = 0;
-  obstacleY = random(20, height-20);
+  // Initialize obstacle position and speed
+  resetObstacle();
+  
+  // Reset game variables
+  score = 0;
+  hits = 0;
+  obstacleSpeed = 2;
+  gameOver = false;
 }
 
 function draw() {
@@ -65,92 +69,102 @@ function drawObstacle() {
   rect(obstacleX, obstacleY, 20, 20);
 }
 
-// Basic left/right movement provided
 function movePlayer() {
-  if (keyIsDown(LEFT_ARROW)) {
+  // Basic left/right movement with boundary checking
+  if (keyIsDown(LEFT_ARROW) && playerX > 0) {
     playerX -= 5;
   }
-  if (keyIsDown(RIGHT_ARROW)) {
+  if (keyIsDown(RIGHT_ARROW) && playerX < width) {
     playerX += 5;
   }
-  if (keyIsDown(UP_ARROW)) {
-    playerY -= 5
-  }
-  if (keyIsDown(DOWN_ARROW)) {
-    playerY += 5
-  }
-  // TODO: Add up/down movement
-  // HINT: Use UP_ARROW and DOWN_ARROW keys
-  // Movement should be 5 pixels per frame
   
-  // TODO: Add boundary checking
-  // HINT: Keep player within canvas bounds
-  // Check against 0, width, and height
+  // Up/down movement with boundary checking
+  if (keyIsDown(UP_ARROW) && playerY > 0) {
+    playerY -= 5;
+  }
+  if (keyIsDown(DOWN_ARROW) && playerY < height) {
+    playerY += 5;
+  }
 }
 
 function moveObstacle() {
-  // TODO: Move obstacle from left to right
-  // HINT: Increase obstacleX by obstacleSpeed
+  // Move obstacle from top to bottom
+  obstacleY += obstacleSpeed;
   
-  // TODO: Reset obstacle when it goes off screen
-  // HINT: Check if obstacleX > width
-  // Reset to left side and new random Y position
+  // Reset obstacle when it goes off screen and increase speed
+  if (obstacleY > height) {
+    resetObstacle();
+    obstacleSpeed += 0.5; // Increase speed each time it resets
+  }
+}
+
+function resetObstacle() {
+  // Reset obstacle to the top with a random X position
+  obstacleY = 0;
+  obstacleX = random(20, width - 20);
 }
 
 function checkCoinCollection() {
-  // TODO: Check if player touches coin
-  // HINT: Use dist(playerX, playerY, coinX, coinY)
-  // If distance < 15:
-  //   - Increase score
-  //   - Create new coin
-  //   - Increase obstacle speed slightly
+  // Check if player collects the coin
+  if (dist(playerX, playerY, coinX, coinY) < 15) {
+    score++;
+    randomizePositions(); // Move all elements to random locations
+    obstacleSpeed += 0.5; // Increase obstacle speed slightly
+  }
 }
 
 function checkCollisions() {
-  // TODO: Check if player hits obstacle
-  // HINT: Similar to coin collection
-  // If hit (distance < 20):
-  //   - Increase hits
-  //   - Check for game over (hits >= 3)
-  //   - Reset positions
+  // Check if player hits the obstacle
+  if (dist(playerX, playerY, obstacleX, obstacleY) < 20) {
+    hits++;
+    
+    if (hits >= 3) {
+      gameOver = true;
+    } else {
+      // Reset player to starting position on collision
+      playerX = width / 2;
+      playerY = height - 20;
+    }
+  }
 }
 
 function displayStats() {
   fill(0);
   textSize(16);
   text("Score: " + score, 10, 20);
-  // TODO: Add display for hits and speed
+  text("Hits: " + hits, 10, 40);
+  text("Speed: " + obstacleSpeed.toFixed(1), 10, 60);
 }
 
 function displayGameOver() {
-  // TODO: Show game over screen
-  // HINT: Use textAlign(CENTER, CENTER)
-  // Show:
-  //   - "Game Over" message
-  //   - Final score
-  //   - "Press R to Restart"
+  // Show game over screen with final score and restart instructions
+  background(220);
+  fill(0);
+  textSize(32);
+  textAlign(CENTER, CENTER);
+  text("GAME OVER", width / 2, height / 2 - 20);
+  textSize(20);
+  text("Score: " + score, width / 2, height / 2 + 20);
+  text("Press 'R' to Restart", width / 2, height / 2 + 50);
 }
 
 function newCoin() {
-  // Generate random position for coin
-  coinX = random(20, width-20);
-  coinY = random(20, height-20);
+  // Generate a new random position for the coin
+  coinX = random(20, width - 20);
+  coinY = random(20, height - 20);
 }
 
-function resetGame() {
-  // TODO: Reset all game variables
-  // HINT: Reset score, hits, speed
-  // Set gameOver to false
-  // Call initializeGame()
+function randomizePositions() {
+  // Randomize positions of player, coin, and obstacle
+  playerX = random(20, width - 20);
+  playerY = random(20, height - 20);
+  newCoin(); // Generate new random position for coin
+  resetObstacle(); // Reset obstacle to random X position at the top
 }
 
 function keyPressed() {
-  // TODO: Check for 'R' key to restart game
-  // HINT: Use key === 'r' || key === 'R'
-  // Only works when game is over
-}
-
-// Helper function you might need
-function distance(x1, y1, x2, y2) {
-  return dist(x1, y1, x2, y2);
+  // Reset game when 'R' key is pressed
+  if (gameOver && (key === 'r' || key === 'R')) {
+    initializeGame();
+  }
 }
