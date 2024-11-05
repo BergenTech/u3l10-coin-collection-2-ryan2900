@@ -17,10 +17,8 @@ function initializeGame() {
   playerX = width / 2;
   playerY = height - 20;
   
-  // Initialize coin position
+  // Initialize positions for coin and obstacle
   newCoin();
-  
-  // Initialize obstacle position and speed
   resetObstacle();
   
   // Reset game variables
@@ -121,6 +119,7 @@ function checkCollisions() {
     if (hits >= 3) {
       gameOver = true;
     } else {
+      randomizePositions(); // Move all elements to random locations
       // Reset player to starting position on collision
       playerX = width / 2;
       playerY = height - 20;
@@ -133,7 +132,7 @@ function displayStats() {
   textSize(16);
   text("Score: " + score, 10, 20);
   text("Hits: " + hits, 10, 40);
-  text("Speed: " + obstacleSpeed.toFixed(1), 10, 60);
+  text("Speed: " + obstacleSpeed, 10, 60);
 }
 
 function displayGameOver() {
