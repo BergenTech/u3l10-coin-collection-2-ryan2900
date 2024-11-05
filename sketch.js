@@ -3,7 +3,10 @@ let playerX, playerY;
 let coinX, coinY;
 let obstacleX, obstacleY;
 let score = 0;
+let hits = 0;
+let obstacleSpeed = 2;
 let gameOver = false;
+let checkCoinCollected = false;
 
 function setup() {
   createCanvas(400, 400);
@@ -70,7 +73,12 @@ function movePlayer() {
   if (keyIsDown(RIGHT_ARROW)) {
     playerX += 5;
   }
-  
+  if (keyIsDown(UP_ARROW)) {
+    playerY -= 5
+  }
+  if (keyIsDown(DOWN_ARROW)) {
+    playerY += 5
+  }
   // TODO: Add up/down movement
   // HINT: Use UP_ARROW and DOWN_ARROW keys
   // Movement should be 5 pixels per frame
